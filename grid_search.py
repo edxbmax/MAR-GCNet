@@ -218,6 +218,8 @@ def choose_model(models, nleads, num_classes, device, adj_file=None, inp=None, t
         return xresnet1d101(input_channels=nleads, num_classes=num_classes).to(device)
     elif models == 'inceptiontime':
         return inceptiontime(input_channels=nleads, num_classes=num_classes).to(device)
+    elif models == 'mobilenetv3':
+        return mobilenetv3_small(input_channels=nleads, num_classes=num_classes).to(device)
 
 
 if __name__ == "__main__":
