@@ -15,7 +15,7 @@ from models.resnet1d_wang import resnet1d_wang
 from models.lstm import lstm_bidir
 from models.xresnet1d101 import xresnet1d101
 from models.inceptiontime import inceptiontime
-from models.Mynet import eca3_resnet, eca5_resnet, eca7_resnet, ms_eca_resnet, gcn2_ms_eca_resnet, gcnthree_ms_eca_resnet
+from models.Mynet import ecanet_3, ecanet_5, ecanet_7, marnet, mar_gcn1, mar_gcn2, mar_gcn3
 
 def set_seed(args):
     random.seed(args.seed)
@@ -27,20 +27,6 @@ def set_seed(args):
         torch.cuda.manual_seed_all(args.seed)
         torch.backends.cudnn.benchmark = False
         torch.backends.cudnn.deterministic = True
-
-def weights_init(m): 
-    if isinstance(m, nn.Conv1d):
-        nn.init.kaiming_uniform_(m.weight, nonlinearity="relu")
-        if m.bias is not None:
-            nn.init.zeros_(m.bias)
-    elif isinstance(m, nn.Linear):
-        nn.init.kaiming_uniform_(m.weight, nonlinearity="relu")
-        if m.bias is not None:
-            nn.init.zeros_(m.bias)
-    elif isinstance(m, nn.BatchNorm1d):
-        nn.init.constant_(m.weight, 1)
-        if m.bias is not None:
-            nn.init.constant_(m.bias, 0)
     
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -58,7 +44,6 @@ def parse_args():
     parser.add_argument('--model-path', type=str, default='', help='Path to saved model')
     return parser.parse_args()
 
-# 训练
 def train(dataloader, net, args, criterion, epoch, scheduler, optimizer, device):
     print('Training epoch %d:' % epoch)
     net.train() 
@@ -208,20 +193,20 @@ def test2(dataloader, net, args, device, b):
 
 
 def choose_model(models, nleads, num_classes, device, adj_file=None, inp=None, t=None):
-    if models == 'eca3_resnet':
-        return eca3_resnet(input_channels=nleads, num_classes=num_classes).to(device)
-    elif models == 'eca5_resnet':
-        return eca5_resnet(input_channels=nleads, num_classes=num_classes).to(device)
-    elif models == 'eca7_resnet':
-        return eca7_resnet(input_channels=nleads, num_classes=num_classes).to(device)
-    elif models == 'ms_eca_resnet':
-        return ms_eca_resnet(input_channels=nleads, num_classes=num_classes).to(device)
-    elif models == 'gcn2_ms_eca_resnet':
-        return gcn2_ms_eca_resnet(input_channels=nleads, num_classes=num_classes, adj_file=adj_file, inp=inp, t=t).to(device)
-    elif models == 'gcnone_ms_eca_resnet':
-        return gcnone_ms_eca_resnet(input_channels=nleads, num_classes=num_classes, adj_file=adj_file, inp=inp, t=t).to(device)
-    elif models == 'gcnthree_ms_eca_resnet':
-        return gcnthree_ms_eca_resnet(input_channels=nleads, num_classes=num_classes, adj_file=adj_file, inp=inp, t=t).to(device)
+    if models == 'ecanet_3':
+        return ecanet_3(input_channels=nleads, num_classes=num_classes).to(device)
+    elif models == 'ecanet_5':
+        return ecanet_5(input_channels=nleads, num_classes=num_classes).to(device)
+    elif models == 'ecanet_7':
+        return ecanet_7(input_channels=nleads, num_classes=num_classes).to(device)
+    elif models == 'marnet':
+        return marnet(input_channels=nleads, num_classes=num_classes).to(device)
+    elif models == 'mar_gcn1':
+        return mar_gcn1(input_channels=nleads, num_classes=num_classes, adj_file=adj_file, inp=inp, t=t).to(device)
+    elif models == 'mar_gcn2':
+        return mar_gcn2(input_channels=nleads, num_classes=num_classes, adj_file=adj_file, inp=inp, t=t).to(device)
+    elif models == 'mar_gcn3':
+        return mar_gcn3(input_channels=nleads, num_classes=num_classes, adj_file=adj_file, inp=inp, t=t).to(device)
     
     elif models == 'fcn_wang':
         return fcn_wang(input_channels=nleads, num_classes=num_classes).to(device)
@@ -271,13 +256,13 @@ if __name__ == "__main__":
 ##        'inceptiontime',
 ##        'mobilenetv3',
     
-##        'eca3_resnet',
-##        'eca5_resnet',
-##        'eca7_resnet',
-##        'ms_eca_resnet',
-        'gcn2_ms_eca_resnet',
-##        'gcnone_ms_eca_resnet',
-##        'gcnthree_ms_eca_resnet'
+##        'ecanet_3',
+##        'ecanet_5',
+##        'ecanet_7',
+##        'marnet',
+##        'mar_gcn1',
+        'mar_gcn2',
+##        'mar_gcn3'
         
     ]
             
@@ -357,12 +342,11 @@ if __name__ == "__main__":
                                 flag = args.best_metric
                             epoch += 1
 
-                    # 预测
                     args.phase = 'test'
                     if os.path.exists(args.model_path):
                         net = choose_model(model, nleads, num_classes, device, adj_file, inp, t)
-                        net.load_state_dict(torch.load(args.model_path, map_location=device))  # 加载网络
-                        net.eval()  # 不启用 BatchNormalization 和 Dropout。此时pytorch会自动把BN和DropOut固定住，不会取平均，而是用训练好的值。
+                        net.load_state_dict(torch.load(args.model_path, map_location=device))  
+                        net.eval() 
 
                         print('Results on test data:')
                         if b == None:
