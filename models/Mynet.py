@@ -260,9 +260,9 @@ class ResNet1d_gcn2(nn.Module):
         
         return out1, out2
 
-class ResNet1d_gcnone(nn.Module):
+class ResNet1d_gcn1(nn.Module):
     def __init__(self, block, layers, input_channels=12, inplanes=64, num_classes=9, adj_file=None, inp=None, t=None):
-        super(ResNet1d_gcnone, self).__init__()  #
+        super(ResNet1d_gcn1, self).__init__()  #
         self.inplanes = inplanes 
         self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False) 
         self.bn1 = nn.BatchNorm1d(inplanes) 
@@ -332,9 +332,9 @@ class ResNet1d_gcnone(nn.Module):
         
         return out1, out2
 
-class ResNet1d_gcnthree(nn.Module):
+class ResNet1d_gcn3(nn.Module):
     def __init__(self, block, layers, input_channels=12, inplanes=64, num_classes=9, adj_file=None, inp=None, t=None):
-        super(ResNet1d_gcnthree, self).__init__() 
+        super(ResNet1d_gcn3, self).__init__() 
         self.inplanes = inplanes 
         self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False) 
         self.bn1 = nn.BatchNorm1d(inplanes) 
@@ -410,32 +410,32 @@ class ResNet1d_gcnthree(nn.Module):
         
         return out1, out2
 
-def eca3_resnet(**kwargs):
+def ecanet_3(**kwargs):
     model = ResNet1d(ECABasicBlock1d, [1, 1, 1, 1], 3, **kwargs)
     return model
 
-def eca5_resnet(**kwargs):
+def ecanet_5(**kwargs):
     model = ResNet1d(ECABasicBlock1d, [1, 1, 1, 1], 5, **kwargs)
     return model
 
-def eca7_resnet(**kwargs):
+def ecasnet_7(**kwargs):
     model = ResNet1d(ECABasicBlock1d, [1, 1, 1, 1], 7, **kwargs)
     return model
 
-def ms_eca_resnet(**kwargs):
+def marnet(**kwargs):
     model = ResNet1d_ms(ECABasicBlock1d, [1, 1, 1, 1], **kwargs)
     return model
 
-def gcn2_ms_eca_resnet(**kwargs):
+def mar_gcn2(**kwargs):
     model = ResNet1d_gcn2(ECABasicBlock1d, [1, 1, 1, 1], **kwargs)
     return model
 
-def gcnone_ms_eca_resnet(**kwargs):
-    model = ResNet1d_gcnone(ECABasicBlock1d, [1, 1, 1, 1], **kwargs)
+def mar_gcn1(**kwargs):
+    model = ResNet1d_gcn1(ECABasicBlock1d, [1, 1, 1, 1], **kwargs)
     return model
 
-def gcnthree_ms_eca_resnet(**kwargs):
-    model = ResNet1d_gcnthree(ECABasicBlock1d, [1, 1, 1, 1], **kwargs)
+def mar_gcn3(**kwargs):
+    model = ResNet1d_gcn3(ECABasicBlock1d, [1, 1, 1, 1], **kwargs)
     return model
 
 class GraphConvolution(nn.Module):
