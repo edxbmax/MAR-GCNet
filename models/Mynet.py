@@ -22,7 +22,7 @@ class BasicBlock1d(nn.Module):
 
 
     def forward(self, x):
-        residual = x  # 残差
+        residual = x 
         # 1
         out = self.conv1(x)
         out = self.bn1(out)
@@ -34,7 +34,7 @@ class BasicBlock1d(nn.Module):
 
         if self.downsample is not None:
             residual = self.downsample(x)
-        out += residual  # 相加
+        out += residual 
         out = self.relu(out)
         return out
 
@@ -55,7 +55,7 @@ class ECABasicBlock1d(nn.Module):
 
 
     def forward(self, x):
-        residual = x  # 残差
+        residual = x 
         # 1
         out = self.conv1(x)
         out = self.bn1(out)
@@ -69,40 +69,34 @@ class ECABasicBlock1d(nn.Module):
 
         if self.downsample is not None:
             residual = self.downsample(x)
-        out += residual  # 相加
+        out += residual 
         out = self.relu(out)
         return out
 
 class ResNet1d(nn.Module):
     def __init__(self, block, layers, k=3, input_channels=12, inplanes=64, num_classes=9, adj_file=None, inp=None, t=None):
-        super(ResNet1d, self).__init__()  #
-        self.inplanes = inplanes  # 卷积产生的通道数
-        # 一维卷积                 输入通道数        输出通道数        卷积核大小       步幅       填充     向输出添加可学习偏差
-        # 卷积后维度 (n - k + 2 * p ) / s + 1  （15000 - 15 + 2*7）// 2  + 1 = 7500
-        self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False)  # 64
-        self.bn1 = nn.BatchNorm1d(inplanes)  # 归一化  1d
+        super(ResNet1d, self).__init__() 
+        self.inplanes = inplanes  
+        self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False)
+        self.bn1 = nn.BatchNorm1d(inplanes) 
         self.relu = nn.ReLU()  # relu
-        
-##        self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)  # 最大池化  （7500 - 3 + 2*1）// 2 + 1 = 3750
-
-        self.layer = self.mslayer(block, layers, k)  # 3
-        
-        # 对于任何输入大小的输入，可以将输出尺寸指定为1，但是输入和输出特征的数目不会变化。 1 * 512 * x(数据长度)
-        self.adaptiveavgpool = nn.AdaptiveAvgPool1d(1)  # 自适应平均池化  1d  1维 1 * 512 * 1
+##        self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1) 
+        self.layer = self.mslayer(block, layers, k)  
+        self.adaptiveavgpool = nn.AdaptiveAvgPool1d(1)
 ##        self.adaptivemaxpool = nn.AdaptiveMaxPool1d(1)
         
         self.fc = nn.Linear(64, num_classes)
         
     def mslayer(self, block, layers, ks):
         self.inplanes = 64
-        layer1 = self._make_layer(block, 64, layers[0], ks)  # 3
-        layer2 = self._make_layer(block, 64, layers[1], ks, stride=2)  # 4
-        layer3 = self._make_layer(block, 64, layers[2], ks, stride=2)  # 6
-        layer4 = self._make_layer(block, 64, layers[3], ks, stride=2)  # 3
+        layer1 = self._make_layer(block, 64, layers[0], ks)
+        layer2 = self._make_layer(block, 64, layers[1], ks, stride=2)
+        layer3 = self._make_layer(block, 64, layers[2], ks, stride=2)
+        layer4 = self._make_layer(block, 64, layers[3], ks, stride=2) 
         return nn.Sequential(layer1, layer2, layer3, layer4)
     
     def _make_layer(self, block, planes, blocks, ks, stride=1):
-        downsample = None  # 下采样  使得残差与输出大小一致
+        downsample = None 
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv1d(self.inplanes, planes * block.expansion,
@@ -111,9 +105,9 @@ class ResNet1d(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, ks, stride, downsample))  # 1
-        self.inplanes = planes * block.expansion  # 改变输入通道数
-        for _ in range(1, blocks):  # -1
+        layers.append(block(self.inplanes, planes, ks, stride, downsample))
+        self.inplanes = planes * block.expansion 
+        for _ in range(1, blocks):  
             layers.append(block(self.inplanes, planes, ks))
         return nn.Sequential(*layers)
 
@@ -131,33 +125,29 @@ class ResNet1d(nn.Module):
 
 class ResNet1d_ms(nn.Module):
     def __init__(self, block, layers, input_channels=12, inplanes=64, num_classes=9, adj_file=None, inp=None, t=None):
-        super(ResNet1d_ms, self).__init__()  #
-        self.inplanes = inplanes  # 卷积产生的通道数
-        # 一维卷积                 输入通道数        输出通道数        卷积核大小       步幅       填充     向输出添加可学习偏差
-        # 卷积后维度 (n - k + 2 * p ) / s + 1  （15000 - 15 + 2*7）// 2  + 1 = 7500
-        self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False)  # 64
-        self.bn1 = nn.BatchNorm1d(inplanes)  # 归一化 1d
+        super(ResNet1d_ms, self).__init__() 
+        self.inplanes = inplanes  
+        self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False)
+        self.bn1 = nn.BatchNorm1d(inplanes)
         self.relu = nn.ReLU()  # relu
-##        self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)  # 最大池化  （7500 - 3 + 2*1）// 2 + 1 = 3750
-
+##        self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1) 
         self.layer3 = self.mslayer(block, layers, 3)  # 3
         self.layer5 = self.mslayer(block, layers, 5)  # 5
         self.layer7 = self.mslayer(block, layers, 7)  # 7
         
-        # 对于任何输入大小的输入，可以将输出尺寸指定为1，但是输入和输出特征的数目不会变化。 1 * 512 * x(数据长度)
-        self.adaptiveavgpool = nn.AdaptiveAvgPool1d(1)  # 自适应平均池化  1d  1维 1 * 512 * 1
+        self.adaptiveavgpool = nn.AdaptiveAvgPool1d(1) 
         self.fc = nn.Linear(64*3, num_classes)
                 
     def mslayer(self, block, layers, ks):
         self.inplanes = 64
-        layer1 = self._make_layer(block, 64, layers[0], ks)  # 3
-        layer2 = self._make_layer(block, 64, layers[1], ks, stride=2)  # 4
-        layer3 = self._make_layer(block, 64, layers[2], ks, stride=2)  # 6
-        layer4 = self._make_layer(block, 64, layers[3], ks, stride=2)  # 3
+        layer1 = self._make_layer(block, 64, layers[0], ks) 
+        layer2 = self._make_layer(block, 64, layers[1], ks, stride=2) 
+        layer3 = self._make_layer(block, 64, layers[2], ks, stride=2)  
+        layer4 = self._make_layer(block, 64, layers[3], ks, stride=2) 
         return nn.Sequential(layer1, layer2, layer3, layer4)
     
     def _make_layer(self, block, planes, blocks, ks, stride=1):
-        downsample = None  # 下采样  使得残差与输出大小一致
+        downsample = None  
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv1d(self.inplanes, planes * block.expansion,
@@ -166,9 +156,9 @@ class ResNet1d_ms(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, ks, stride, downsample))  # 1
-        self.inplanes = planes * block.expansion  # 改变输入通道数
-        for _ in range(1, blocks):  # -1
+        layers.append(block(self.inplanes, planes, ks, stride, downsample)) 
+        self.inplanes = planes * block.expansion 
+        for _ in range(1, blocks): 
             layers.append(block(self.inplanes, planes, ks))
         return nn.Sequential(*layers)
 
@@ -196,21 +186,18 @@ class ResNet1d_ms(nn.Module):
 
 class ResNet1d_gcn2(nn.Module):
     def __init__(self, block, layers, input_channels=12, inplanes=64, num_classes=9, adj_file=None, inp=None, t=None):
-        super(ResNet1d_gcn2, self).__init__()  #
-        self.inplanes = inplanes  # 卷积产生的通道数
-        # 一维卷积                 输入通道数        输出通道数        卷积核大小       步幅       填充     向输出添加可学习偏差
-        # 卷积后维度 (n - k + 2 * p ) / s + 1  （15000 - 15 + 2*7）// 2  + 1 = 7500
-        self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False)  # 64
-        self.bn1 = nn.BatchNorm1d(inplanes)  # 归一化  1d
+        super(ResNet1d_gcn2, self).__init__() 
+        self.inplanes = inplanes 
+        self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False) 
+        self.bn1 = nn.BatchNorm1d(inplanes) 
         self.relu = nn.ReLU()  # relu
-##        self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)  # 最大池化  （7500 - 3 + 2*1）// 2 + 1 = 3750
+##        self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)  
 
         self.layer3 = self.mslayer(block, layers, 3)  # 3
         self.layer5 = self.mslayer(block, layers, 5)  # 5
         self.layer7 = self.mslayer(block, layers, 7)  # 7
         
-        # 对于任何输入大小的输入，可以将输出尺寸指定为1，但是输入和输出特征的数目不会变化。 1 * 512 * x(数据长度)
-        self.adaptiveavgpool = nn.AdaptiveAvgPool1d(1)  # 自适应平均池化  1d  1维 1 * 512 * 1
+        self.adaptiveavgpool = nn.AdaptiveAvgPool1d(1) 
         self.fc = nn.Linear(64 * block.expansion*3, num_classes)
 
         self.inp = torch.from_numpy(inp).float().to(torch.device("cuda:0"))
@@ -224,14 +211,14 @@ class ResNet1d_gcn2(nn.Module):
         
     def mslayer(self, block, layers, ks):
         self.inplanes = 64
-        layer1 = self._make_layer(block, 64, layers[0], ks)  # 3
-        layer2 = self._make_layer(block, 64, layers[1], ks, stride=2)  # 4
-        layer3 = self._make_layer(block, 64, layers[2], ks, stride=2)  # 6
-        layer4 = self._make_layer(block, 64, layers[3], ks, stride=2)  # 3
+        layer1 = self._make_layer(block, 64, layers[0], ks) 
+        layer2 = self._make_layer(block, 64, layers[1], ks, stride=2)  
+        layer3 = self._make_layer(block, 64, layers[2], ks, stride=2) 
+        layer4 = self._make_layer(block, 64, layers[3], ks, stride=2) 
         return nn.Sequential(layer1, layer2, layer3, layer4)
     
     def _make_layer(self, block, planes, blocks, ks, stride=1):
-        downsample = None  # 下采样  使得残差与输出大小一致
+        downsample = None 
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv1d(self.inplanes, planes * block.expansion,
@@ -240,9 +227,9 @@ class ResNet1d_gcn2(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, ks, stride, downsample))  # 1
-        self.inplanes = planes * block.expansion  # 改变输入通道数
-        for _ in range(1, blocks):  # -1
+        layers.append(block(self.inplanes, planes, ks, stride, downsample))  
+        self.inplanes = planes * block.expansion 
+        for _ in range(1, blocks): 
             layers.append(block(self.inplanes, planes, ks))
         return nn.Sequential(*layers)
 
@@ -276,20 +263,16 @@ class ResNet1d_gcn2(nn.Module):
 class ResNet1d_gcnone(nn.Module):
     def __init__(self, block, layers, input_channels=12, inplanes=64, num_classes=9, adj_file=None, inp=None, t=None):
         super(ResNet1d_gcnone, self).__init__()  #
-        self.inplanes = inplanes  # 卷积产生的通道数
-        # 一维卷积                 输入通道数        输出通道数        卷积核大小       步幅       填充     向输出添加可学习偏差
-        # 卷积后维度 (n - k + 2 * p ) / s + 1  （15000 - 15 + 2*7）// 2  + 1 = 7500
-        self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False)  # 64
-        self.bn1 = nn.BatchNorm1d(inplanes)  # 归一化  1d
+        self.inplanes = inplanes 
+        self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False) 
+        self.bn1 = nn.BatchNorm1d(inplanes) 
         self.relu = nn.ReLU()  # relu
-##        self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)  # 最大池化  （7500 - 3 + 2*1）// 2 + 1 = 3750
 
         self.layer3 = self.mslayer(block, layers, 3)  # 3
         self.layer5 = self.mslayer(block, layers, 5)  # 5
         self.layer7 = self.mslayer(block, layers, 7)  # 7
         
-        # 对于任何输入大小的输入，可以将输出尺寸指定为1，但是输入和输出特征的数目不会变化。 1 * 512 * x(数据长度)
-        self.adaptiveavgpool = nn.AdaptiveAvgPool1d(1)  # 自适应平均池化  1d  1维 1 * 512 * 1
+        self.adaptiveavgpool = nn.AdaptiveAvgPool1d(1) 
         self.fc = nn.Linear(64 * block.expansion*3, num_classes)
 
         self.inp = torch.from_numpy(inp).float().to(torch.device("cuda:0"))
@@ -302,14 +285,14 @@ class ResNet1d_gcnone(nn.Module):
         
     def mslayer(self, block, layers, ks):
         self.inplanes = 64
-        layer1 = self._make_layer(block, 64, layers[0], ks)  # 3
-        layer2 = self._make_layer(block, 64, layers[1], ks, stride=2)  # 4
-        layer3 = self._make_layer(block, 64, layers[2], ks, stride=2)  # 6
-        layer4 = self._make_layer(block, 64, layers[3], ks, stride=2)  # 3
+        layer1 = self._make_layer(block, 64, layers[0], ks) 
+        layer2 = self._make_layer(block, 64, layers[1], ks, stride=2) 
+        layer3 = self._make_layer(block, 64, layers[2], ks, stride=2) 
+        layer4 = self._make_layer(block, 64, layers[3], ks, stride=2) 
         return nn.Sequential(layer1, layer2, layer3, layer4)
     
     def _make_layer(self, block, planes, blocks, ks, stride=1):
-        downsample = None  # 下采样  使得残差与输出大小一致
+        downsample = None 
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv1d(self.inplanes, planes * block.expansion,
@@ -318,9 +301,9 @@ class ResNet1d_gcnone(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, ks, stride, downsample))  # 1
-        self.inplanes = planes * block.expansion  # 改变输入通道数
-        for _ in range(1, blocks):  # -1
+        layers.append(block(self.inplanes, planes, ks, stride, downsample))  
+        self.inplanes = planes * block.expansion  
+        for _ in range(1, blocks):  
             layers.append(block(self.inplanes, planes, ks))
         return nn.Sequential(*layers)
 
@@ -351,21 +334,18 @@ class ResNet1d_gcnone(nn.Module):
 
 class ResNet1d_gcnthree(nn.Module):
     def __init__(self, block, layers, input_channels=12, inplanes=64, num_classes=9, adj_file=None, inp=None, t=None):
-        super(ResNet1d_gcnthree, self).__init__()  #
-        self.inplanes = inplanes  # 卷积产生的通道数
-        # 一维卷积                 输入通道数        输出通道数        卷积核大小       步幅       填充     向输出添加可学习偏差
-        # 卷积后维度 (n - k + 2 * p ) / s + 1  （15000 - 15 + 2*7）// 2  + 1 = 7500
-        self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False)  # 64
-        self.bn1 = nn.BatchNorm1d(inplanes)  # 归一化  1d
+        super(ResNet1d_gcnthree, self).__init__() 
+        self.inplanes = inplanes 
+        self.conv1 = nn.Conv1d(input_channels, self.inplanes, kernel_size=15, stride=2, padding=7, bias=False) 
+        self.bn1 = nn.BatchNorm1d(inplanes) 
         self.relu = nn.ReLU()  # relu
-##        self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)  # 最大池化  （7500 - 3 + 2*1）// 2 + 1 = 3750
+##        self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)  
 
         self.layer3 = self.mslayer(block, layers, 3)  # 3
         self.layer5 = self.mslayer(block, layers, 5)  # 5
         self.layer7 = self.mslayer(block, layers, 7)  # 7
         
-        # 对于任何输入大小的输入，可以将输出尺寸指定为1，但是输入和输出特征的数目不会变化。 1 * 512 * x(数据长度)
-        self.adaptiveavgpool = nn.AdaptiveAvgPool1d(1)  # 自适应平均池化  1d  1维 1 * 512 * 1
+        self.adaptiveavgpool = nn.AdaptiveAvgPool1d(1) 
         self.fc = nn.Linear(64 * block.expansion*3, num_classes)
 
         self.inp = torch.from_numpy(inp).float().to(torch.device("cuda:0"))
@@ -379,14 +359,14 @@ class ResNet1d_gcnthree(nn.Module):
         
     def mslayer(self, block, layers, ks):
         self.inplanes = 64
-        layer1 = self._make_layer(block, 64, layers[0], ks)  # 3
-        layer2 = self._make_layer(block, 64, layers[1], ks, stride=2)  # 4
-        layer3 = self._make_layer(block, 64, layers[2], ks, stride=2)  # 6
-        layer4 = self._make_layer(block, 64, layers[3], ks, stride=2)  # 3
+        layer1 = self._make_layer(block, 64, layers[0], ks)  
+        layer2 = self._make_layer(block, 64, layers[1], ks, stride=2) 
+        layer3 = self._make_layer(block, 64, layers[2], ks, stride=2)  
+        layer4 = self._make_layer(block, 64, layers[3], ks, stride=2) 
         return nn.Sequential(layer1, layer2, layer3, layer4)
     
     def _make_layer(self, block, planes, blocks, ks, stride=1):
-        downsample = None  # 下采样  使得残差与输出大小一致
+        downsample = None  
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv1d(self.inplanes, planes * block.expansion,
@@ -395,9 +375,9 @@ class ResNet1d_gcnthree(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, ks, stride, downsample))  # 1
-        self.inplanes = planes * block.expansion  # 改变输入通道数
-        for _ in range(1, blocks):  # -1
+        layers.append(block(self.inplanes, planes, ks, stride, downsample)) 
+        self.inplanes = planes * block.expansion  
+        for _ in range(1, blocks): 
             layers.append(block(self.inplanes, planes, ks))
         return nn.Sequential(*layers)
 
@@ -464,9 +444,9 @@ class GraphConvolution(nn.Module):
     """
     def __init__(self, in_features, out_features, bias=True):
         super(GraphConvolution, self).__init__()
-##        self.in_features = in_features  # 输入特征
-##        self.out_features = out_features  # 输出特征
-        self.weight = nn.Parameter(torch.Tensor(in_features, out_features))  # 权重
+##        self.in_features = in_features 
+##        self.out_features = out_features 
+        self.weight = nn.Parameter(torch.Tensor(in_features, out_features)) 
         if bias:
             self.bias = nn.Parameter(torch.zeros(out_features))
         else:
@@ -489,27 +469,17 @@ class GraphConvolution(nn.Module):
 class ECA(nn.Module):  # Efficient Channel Attention block
     def __init__(self, channels, gamma=2, b=1):
         super(ECA, self).__init__()
-        self.kernel_size = int(abs((math.log(channels, 2) + b) / gamma))  # 计算1d卷积核尺寸
-        self.kernel_size = self.kernel_size if self.kernel_size % 2 else self.kernel_size + 1  # 计算1d卷积核尺寸
+        self.kernel_size = int(abs((math.log(channels, 2) + b) / gamma)) 
+        self.kernel_size = self.kernel_size if self.kernel_size % 2 else self.kernel_size + 1 
 ##        self.kernel_size = 3
 
         self.avg_pool = nn.AdaptiveAvgPool1d(1)  # avgpool
         self.conv = nn.Conv1d(1, 1, kernel_size=self.kernel_size, stride=1, padding=math.ceil((self.kernel_size - 1) / 2),
                               bias=False)  # 1dconv
-        self.sigmoid = nn.Sigmoid()  # sigmoid，将输出压缩到(0,1)
+        self.sigmoid = nn.Sigmoid() 
 
     def forward(self, x):
         weights = self.avg_pool(x)
         weights = self.conv(weights.transpose(-1, -2)).transpose(-1, -2)
         weights = self.sigmoid(weights)
-        return x * weights.expand_as(x)  # 将计算得到的weights与输入的feature map相乘
-
-    
-    
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# data = torch.Tensor(1, 12, 72000)
-# print(data)
-# c = crnn()
-# c(data)
-# summary函数可以查看网络每层的输出的shape信息和参数信息
-# summary(resnet34(), input_size=(1, 12, 1000))
+        return x * weights.expand_as(x)  
