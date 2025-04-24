@@ -142,7 +142,6 @@ def compute_label_aggregations(df, folder, ctype):
 
     return df
 
-
 def select_data(XX, YY, ctype, min_samples, outputfolder):
     # convert multilabel to multi-hot
     mlb = MultiLabelBinarizer()
@@ -211,9 +210,7 @@ def select_data(XX, YY, ctype, min_samples, outputfolder):
 
     return X, Y, y, mlb
 
-
 def preprocess_signals(datafolder, task, X_train, X_validation, X_test, sampling_frequency = 100):
-    # 去噪去基线漂移
     X_train = filtering(X_train, sampling_frequency)
     X_validation = filtering(X_validation, sampling_frequency)
     X_test = filtering(X_test, sampling_frequency)
@@ -237,21 +234,20 @@ def apply_standardizer(X, ss):
     return X_tmp
 
 def filtering(ecg_signal, sampling_frequency=100):
-    # 去噪
     if sampling_frequency > 100:
-        ecgfilt_signal = low_filter(ecg_signal, frequency=sampling_frequency, lowpass=50)  # 去工频噪声
+        ecgfilt_signal = low_filter(ecg_signal, frequency=sampling_frequency, lowpass=50)
     else:
         ecgfilt_signal = ecg_signal
-    ecgfilt_signal = high_filter(ecgfilt_signal, frequency=sampling_frequency, highpass=0.5)  # 去基线漂移
+    ecgfilt_signal = high_filter(ecgfilt_signal, frequency=sampling_frequency, highpass=0.5)
     return ecgfilt_signal
             
 def low_filter(data, frequency=500, lowpass=50):
-    [b, a] = signal.butter(15,  lowpass / frequency * 2, 'lowpass')  # 低通 去工频
+    [b, a] = signal.butter(15,  lowpass / frequency * 2, 'lowpass')
     Signal_pre = signal.filtfilt(b, a, data, axis=0)
     return Signal_pre
 
 def high_filter(data, frequency=500, highpass=0.5):
-    [b, a] = signal.butter(5,  highpass / frequency * 2, 'highpass')  # 高通 去基线
+    [b, a] = signal.butter(5,  highpass / frequency * 2, 'highpass')
     Signal_pre = signal.filtfilt(b, a, data, axis=0)
     return Signal_pre
 
@@ -269,4 +265,3 @@ def data_slice(data):
 
         data_process.append(dat)
     return np.array(data_process)
-
