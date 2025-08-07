@@ -37,7 +37,7 @@ class DownLoadECGData:
         All experiments data
     '''
 
-    def __init__(self, experiment_name, task, datafolder, sampling_frequency=100, min_samples=0,
+    def __init__(self, experiment_name, task, datafolder, sampling_frequency=100, min_samples=0,   # sampling_frequency=500
                  train_fold=8, val_fold=9, test_fold=10):
         self.min_samples = min_samples
         self.task = task
